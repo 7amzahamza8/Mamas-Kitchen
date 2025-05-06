@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, Response, render_template, request, redirect, url_for, session
 import os
 from werkzeug.utils import secure_filename
 from flask_cors import CORS
@@ -15,6 +15,7 @@ import base64
 from datetime import datetime
 
 from werkzeug.utils import secure_filename
+import psycopg2
 
 
 
@@ -266,49 +267,59 @@ def get_cook_profile(cook_id):
         ratings = Rating.query.filter_by(cook_id=cook_id).all()
         average_rating = sum(rating.rating_value for rating in ratings) / len(ratings) if ratings else None
 
-    return jsonify({
-        'cook': {
-            'id': cook.cook_id,
-            'name': cook.cook_name,
-            'email': cook.cook_email,
-            'gender': cook.cook_gender,
-            'location': cook.cook_location,
-            'phone': cook.cook_phone,
-            "average_rating": average_rating   # ✅ added here
-        }
-    })
-    #--------------------------------------
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+    cook_data = {
+        'id': cook.cook_id,
+        'name': cook.cook_name,
+        'email': cook.cook_email,
+        'gender': cook.cook_gender,
+        'location': cook.cook_location,
+        'phone': cook.cook_phone,
+        'average_rating': average_rating,
+        'profile_image': None  # Default profile image
+    }
 
-# @app.route('/upload_profile_image', methods=['POST'])
-# def upload_profile_image():
-#     if 'cook_id' not in session:
-#         return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+    if cook.profile_image:
+        cook_data['profile_image'] = f"data:image/jpeg;base64,{base64.b64encode(cook.profile_image).decode('utf-8')}"
 
-#     file = request.files.get('profile_image')
-#     if not file:
-#         return jsonify({'success': False, 'message': 'No file uploaded'}), 400
+    return jsonify({'cook': cook_data})
 
-#     if file and allowed_file(file.filename):
-#         cook_id = session['cook_id']
-#         filename = secure_filename(f"cook_{cook_id}_" + file.filename)
-#         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#         file.save(file_path)
 
-#         cook = Cook.query.get(cook_id)
-#         cook.profile_image = filename
-#         db.session.commit()
 
-#         return jsonify({'success': True, 'filename': filename})
+#---------------------------------------
+@app.before_request
+def log_session_info():
+    app.logger.debug(f"Session cook_id: {session.get('cook_id')}, user_type: {session.get('user_type')}")
 
-#     return jsonify({'success': False, 'message': 'Invalid file type'}), 400
+# Route to update cook image
+@app.route('/update_cook_image', methods=['POST'])
+def update_cook_image():
+    # Check if the user is logged in as a cook
+    if 'cook_id' not in session or session.get('user_type') != 'cook':
+        return jsonify({"success": False, "error": "Unauthorized"}), 403
 
-# @app.errorhandler(Exception)
-# def handle_exception(e):
-#     import traceback
-#     traceback.print_exc()
-#     return jsonify({'success': False, 'message': 'Server error'}), 500
+    cook_id_from_session = session['cook_id']
+    cook_id_from_form = request.form.get('cook_id')
+
+    # Ensure the cook is trying to update their own profile image
+    if not cook_id_from_form or int(cook_id_from_form) != cook_id_from_session:
+        return jsonify({"success": False, "error": "You can only update your own profile image"}), 403
+
+    # Get the uploaded image
+    image_file = request.files.get('image')
+    if not image_file:
+        return jsonify({"success": False, "error": "No image provided"}), 400
+
+    # Find the cook in the database
+    cook = Cook.query.get(cook_id_from_session)
+    if not cook:
+        return jsonify({"success": False, "error": "Cook not found"}), 404
+
+    # Save the image data into the cook's profile
+    cook.profile_image = image_file.read()
+    db.session.commit()
+
+    return jsonify({"success": True, "message": "Profile image updated"})
+
 
 
 # ---------------------- GET MEALS BY COOK -------------------

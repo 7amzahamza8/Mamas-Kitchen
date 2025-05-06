@@ -38,6 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     .then(res => res.json())
     .then(data => {
       const cook = data.cook;
+      
       document.getElementById("profilePhoto").src = cook.profile_image || "/mamas_kitchen/img/profile.png";
       document.getElementById("cookName").textContent = cook.name;
       document.getElementById("cookEmail").textContent = cook.email;
@@ -241,34 +242,50 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
   }
+  
+  
+});
+document.addEventListener("DOMContentLoaded", () => {
+  const profilePhoto = document.getElementById("profilePhoto");
+  const imageUpload = document.getElementById("imageUpload");
 
-  document.getElementById('imageUpload').addEventListener('change', function() {
-    const file = this.files[0];
-    if (file) {
-        const formData = new FormData();
-        formData.append("profile_image", file);
+  // When profile image is clicked, open file picker
+  profilePhoto.addEventListener("click", () => {
+    imageUpload.click();
+  });
 
-        fetch("/upload_image", {
-            method: "POST",
-            body: formData,
-            credentials: "include"
-        })
-        .then(async res => {
-          const text = await res.text();
-          console.log("Upload raw response:", text);
-          return JSON.parse(text); // may still throw, but you'll see what the server returned
-      })
-      
-        .then(data => {
-            if (data.success) {
-                document.getElementById("profilePhoto").src = "/static/profile_images/" + data.filename + "?t=" + new Date().getTime();
-            } else {
-                alert("Upload failed: " + data.message);
-            }
-        })
-        .catch(err => {
-            alert("Upload failed: " + err.message);
-        });
+  // When file is selected, send to backend
+  imageUpload.addEventListener("change", async () => {
+    if (!imageUpload.files.length) return;
+
+    const formData = new FormData();
+    formData.append("image", imageUpload.files[0]);
+    formData.append("cook_id", cookId); // you already have this global
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/update_cook_image", {
+        method: "POST",
+        body: formData,
+        credentials:"include"
+      });
+
+      const result = await res.json();
+      if (res.ok && result.success) {
+        alert("Profile image updated!");
+        // Bust browser cache
+        fetch(`http://127.0.0.1:5000/cooks/${cookId}`)
+          .then(res => res.json())
+          .then(data => {
+            const cook = data.cook;
+            document.getElementById("profilePhoto").src = cook.profile_image || "/mamas_kitchen/img/profile.png";
+          });
+      } else {
+        alert("Error: " + result.error);
+      }
+    } catch (err) {
+      console.error("Profile image upload failed:", err);
+      alert("Upload failed. Please try again.");
     }
+  });
 });
-});
+
