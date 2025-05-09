@@ -10,12 +10,19 @@
   --border-color: #ffe0b2;
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+*{
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+img{
+  position: relative;
+  bottom: 30px;
+}
 
 [data-theme="dark"] {
   /* Dark Mode - Dark Chocolate Theme */
   --text: #FFE0B2;       /* Creamy orange */
   --text-muted: #BCAAA4; /* Muted brown */
-  --bg-color: linear-gradient(160deg, #3E2723 0%, #1B0D08 100%);
+  --bg-color: linear-gradient(160deg, #3E2723 0%, #685e5b 100%);
   --card-bg: #4E342E;    /* Dark brown */
   --border-color: #6D4C41;
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
@@ -38,6 +45,7 @@ h1 {
   position: relative;
   display: inline-block;
   width: 100%;
+  
 }
 
 h1::after {
@@ -137,9 +145,9 @@ h1::after {
 
 /* ========== Theme Toggle ========== */
 .theme-toggle {
-  position: fixed;
-  top: 1.5rem;
-  right: 1.5rem;
+  position: relative;
+  top: -230px;
+  left: 1100px;
   padding: 0.8rem 1.5rem;
   border-radius: 12px;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -173,6 +181,8 @@ h1::after {
 }
 /* ========== Filter By Location ========== */
 #locationFilter {
+  position: relative;
+  margin-right: -20px;
   display: inline-block;
   padding: 0.8rem 1.2rem;
   font-size: 1rem;
@@ -188,7 +198,7 @@ h1::after {
   background-repeat: no-repeat;
   background-position: right 1rem center;
   background-size: 1rem;
-  margin-left: 40px;
+ 
 }
 
 #locationFilter:focus {
@@ -198,6 +208,111 @@ h1::after {
 }
 
 label[for="locationFilter"] {
+  position: relative;
+ margin-right: -20px;
+  display: block;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-left: 40px;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+footer{
+  background: var(--footer-bg);
+  color:black;
+  text-align: center;
+  padding: 2rem;
+  margin-top: 4rem;
+  border-top: 1px solid var(--border-color);
+}
+.spinner {
+  border: 6px solid #f3f3f3;
+  border-top: 6px solid #fa8e41; /* or your theme color */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+[data-theme='dark'] .spinner-overlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.filters-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+margin-right: 150px;
+}
+
+.filter-group label {
+  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.filter-group select,
+.filter-group input {
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  width: 240px;
+}
+
+/* Optional styling */
+.filter-group select:focus,
+.filter-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.2);
+}
+
+/* ========== Name Search Input ========== */
+#nameSearch {
+  position: relative;
+  right: -400px;
+
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--card-bg);
+  color: var(--text);
+  margin: 0 auto 2rem auto;
+  box-shadow: var(--shadow);
+  transition: all 0.3s ease;
+  width: 240px;
+margin-right: 290px;
+}
+
+#nameSearch:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.2);
+}
+
+label[for="nameSearch"] {
+  position: relative;
+  margin-right: -390px;
   display: block;
   font-weight: 600;
   color: var(--text-muted);

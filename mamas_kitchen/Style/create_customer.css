@@ -310,7 +310,9 @@ body {
     z-index: 1;
     box-shadow: -10px 0 30px rgba(0,0,0,0.05);
 }
-
+*{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  }
 /* Rest of your existing styles remain the same */
 /* ... (keep all other CSS rules) ... */
 

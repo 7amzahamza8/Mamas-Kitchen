@@ -6,48 +6,76 @@
   <link rel="stylesheet" href="/mamas_kitchen/Style/homepage.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
+
+
+    
+  <img style="width: 110px;" src="/mamas_kitchen/img/logo-removebg-preview.png" alt="">
+  
   <h1>👩🍳 Available Chefs</h1>
 
   <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark Mode</button>
 
-  <label for="locationFilter">Filter by Location:</label>
-  <select id="locationFilter" onchange="filterByLocation()">
-    <option value="all">All</option>
-    <option value="Cairo">Cairo</option>
-                        <option value="Alexandria">Alexandria</option>
-                        <option value="Giza">Giza</option>
-                        <option value="Shubra El-Kheima">Shubra El-Kheima</option>
-                        <option value="Port Said">Port Said</option>
-                        <option value="Suez">Suez</option>
-                        <option value="Luxor">Luxor</option>
-                        <option value="Mansoura">Mansoura</option>
-                        <option value="El-Mahalla El-Kubra">El-Mahalla El-Kubra</option>
-                        <option value="Tanta">Tanta</option>
-                        <option value="Asyut">Asyut</option>
-                        <option value="Ismailia">Ismailia</option>
-                        <option value="Faiyum">Faiyum</option>
-                        <option value="Zagazig">Zagazig</option>
-                        <option value="Aswan">Aswan</option>
-                        <option value="Damietta">Damietta</option>
-                        <option value="Damanhur">Damanhur</option>
-                        <option value="Minya">Minya</option>
-                        <option value="Beni Suef">Beni Suef</option>
-                        <option value="Qena">Qena</option>
-                        <option value="Sohag">Sohag</option>
-                        <option value="Hurghada">Hurghada</option>
-                        <option value="6th of October City">6th of October City</option>
-                        <option value="Shibin El Kom">Shibin El Kom</option>
-                        <option value="Banha">Banha</option>
-                        <option value="Arish">Arish</option>
-                        <option value="10th of Ramadan City">10th of Ramadan City</option>
-                        <option value="Kafr el-Sheikh">Kafr el-Sheikh</option>
-                        <option value="Marsa Matruh">Marsa Matruh</option>
-  </select>
+  <div class="filters-container">
+    <div class="filter-group">
+      <label for="locationFilter">Filter by Location:</label>
+      <select id="locationFilter" onchange="filterByLocation()">
+        <option value="all">All</option>
+        <option value="Cairo">Cairo</option>
+        <option value="Alexandria">Alexandria</option>
+        <option value="Giza">Giza</option>
+        <option value="Shubra El-Kheima">Shubra El-Kheima</option>
+        <option value="Port Said">Port Said</option>
+        <option value="Suez">Suez</option>
+        <option value="Luxor">Luxor</option>
+        <option value="Mansoura">Mansoura</option>
+        <option value="El-Mahalla El-Kubra">El-Mahalla El-Kubra</option>
+        <option value="Tanta">Tanta</option>
+        <option value="Asyut">Asyut</option>
+        <option value="Ismailia">Ismailia</option>
+        <option value="Faiyum">Faiyum</option>
+        <option value="Zagazig">Zagazig</option>
+        <option value="Aswan">Aswan</option>
+        <option value="Damietta">Damietta</option>
+        <option value="Damanhur">Damanhur</option>
+        <option value="Minya">Minya</option>
+        <option value="Beni Suef">Beni Suef</option>
+        <option value="Qena">Qena</option>
+        <option value="Sohag">Sohag</option>
+        <option value="Hurghada">Hurghada</option>
+        <option value="6th of October City">6th of October City</option>
+        <option value="Shibin El Kom">Shibin El Kom</option>
+        <option value="Banha">Banha</option>
+        <option value="Arish">Arish</option>
+        <option value="10th of Ramadan City">10th of Ramadan City</option>
+        <option value="Kafr el-Sheikh">Kafr el-Sheikh</option>
+        <option value="Marsa Matruh">Marsa Matruh</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="nameSearch">Search by Cook Name:</label>
+      <input type="text" id="nameSearch" placeholder="search" onkeyup="searchByName()" />
+    </div>
+  </div>
+  
+  <div id="loading-message" style="text-align: center; margin: 20px;">
+    <div class="spinner" style="margin: 0 auto;"></div>
+    <p style="font-size: 18px; font-weight: 500;">Loading... Getting available cooks</p>
+  </div>
+  
 
   <div id="cards" class="card-container"></div>
+  <footer>
+    <p>&copy; 2025 Mama's Kitchen | Cairo, Egypt | <span id="footerPhone"></span></p>
+    <button onclick="window.location.href='homepage.html'" 
+    style="padding: 10px 20px; font-size: 16px; border: 2px solid #6f4e37; background-color: white; color: #6f4e37; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+<i class="fas fa-arrow-up"></i>
+</button>
+  </footer>
 
   <script src="/mamas_kitchen/js/homepage.js"></script>
+
 </body>
 </html>

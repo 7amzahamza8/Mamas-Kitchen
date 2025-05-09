@@ -47,6 +47,11 @@ body {
     min-height: auto;
 }
 
+
+*{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  }
+
 .right-container {
     position: fixed;
     right: 0;

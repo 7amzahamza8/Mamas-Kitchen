@@ -29,6 +29,8 @@ app.logger.setLevel(logging.DEBUG)
 
 # Load config and secret key
 app.config.from_pyfile('config.py')
+app.secret_key = 'your_secret_key'  # Set this to a secret value
+
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'your-secret-key-here')
 
 
@@ -37,6 +39,10 @@ UPLOAD_FOLDER = 'static/profile_images'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # Maximum size of 16MB
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SECURE'] = True  # Change to True in production with HTTPS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # Adjust according to your needs
+
 
 
 
@@ -58,11 +64,18 @@ def home():
     return "✅ Mama's Kitchen API is running!"
 
 #-------------------------------------
+@app.route('/homepage')
+def homepage():
+    if 'cook_id' not in session:
+        return redirect(url_for('login'))  # Or some fallback
+    return render_template('homepage.html', cook_id=session['cook_id'])
+
 
 # Route to display the cook's profile page
 @app.route('/profile/<int:cook_id>')
 def profile(cook_id):
-    # Get cook profile from the database
+    if 'cook_id' not in session:
+        return redirect(url_for('login')) # Get cook profile from the database
     user = Cook.query.get(cook_id)
     profile_image = user.profile_image if user.profile_image else 'default_profile_image.jpg'
 
@@ -89,6 +102,20 @@ def allowed_file(filename):
 
 
 
+#----------------------
+@app.route("/delete_meal/<int:meal_id>", methods=["DELETE"])
+def delete_meal(meal_id):
+    if not session.get("user_id") or session.get("user_type") != "cook":
+        return jsonify({"success": False, "error": "Unauthorized"}), 403
+
+    conn = db()
+    cur = conn.cursor()
+    cur.execute("DELETE FROM meals WHERE id = %s AND cook_id = %s", (meal_id, session["user_id"]))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return jsonify({"success": True})
 
 
 
@@ -135,8 +162,11 @@ def login():
             'name': customer.customer_name,
             'email': customer.customer_email
         }), 200
+    app.logger.debug("Session data: %s", session)
 
     return jsonify({'message': 'Invalid email or password'}), 401
+
+
 
 # ---------------------- SESSION CHECK -----------------------
 @app.route('/check_session')
@@ -283,7 +313,7 @@ def get_cook_profile(cook_id):
 
     return jsonify({'cook': cook_data})
 
-
+#------------------------------
 
 #---------------------------------------
 @app.before_request
@@ -370,6 +400,26 @@ def add_meal():
 
 
     return jsonify({"success": True})
+#---------------------
+@app.route('/cook_profile')
+def cook_profile():
+    if 'cook_id' not in session:
+        return redirect('/login')  # or an error message
+
+    cook_id = session['cook_id']  # Use cook ID from session
+    conn = db()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM cooks WHERE id = %s', (cook_id,))
+    cook = cur.fetchone()
+
+    cur.execute('SELECT * FROM meals WHERE cook_id = %s', (cook_id,))
+    meals = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template('profile.html', cook=cook, meals=meals)
+
 #--------------------------------------
 @app.route('/submit_rating', methods=['POST'])
 def submit_rating():
@@ -483,7 +533,6 @@ def submit_rating():
         }), 500
 
     
-#----------------------------------------------
 
 
 

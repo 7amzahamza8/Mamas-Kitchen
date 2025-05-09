@@ -5,6 +5,49 @@ const cookId = params.get("cook_id");
 if (!cookId) {
   alert("Cook ID not found.");
 }
+const spinner = document.getElementById("loadingSpinner");
+spinner.style.display = "flex"; // show before fetches
+
+Promise.all([
+  fetch(`http://127.0.0.1:5000/cooks/${cookId}`).then(res => res.json()),
+  fetch(`http://127.0.0.1:5000/meals/${cookId}`).then(res => res.json()),
+])
+.then(([cookData, mealData]) => {
+  const cook = cookData.cook;
+  document.getElementById("profilePhoto").src = cook.profile_image || "/mamas_kitchen/img/profile.png";
+  document.getElementById("cookName").textContent = cook.name;
+  document.getElementById("cookEmail").textContent = cook.email;
+  document.getElementById("cookLocation").textContent = cook.location;
+  document.getElementById("cookPhone").textContent = cook.phone;
+
+  const ratingDisplay = document.getElementById("cookRating");
+  ratingDisplay.textContent = cook.average_rating !== null
+    ? `⭐ ${cook.average_rating} / 5`
+    : "No ratings yet";
+
+  const gallery = document.getElementById("mealGallery");
+  gallery.innerHTML = "";
+  mealData.meals.forEach(meal => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <img src="data:image/jpeg;base64,${meal.image}" 
+           class="loading"
+           data-name="${meal.name}"
+           data-price="${meal.price}" 
+           data-description="${meal.description}"
+           alt="${meal.name}">
+    `;
+    gallery.appendChild(card);
+  });
+
+  spinner.style.display = "none"; // hide after all data loads
+})
+.catch(err => {
+  console.error("Error loading profile or meals:", err);
+  spinner.style.display = "none";
+});
+
 
 // --- THEME TOGGLE ---
 function toggleTheme() {
@@ -288,4 +331,80 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+document.addEventListener("DOMContentLoaded", async () => {
+  const cookId = window.location.pathname.split("/").pop();
+  const gallery = document.getElementById("meal-gallery");
+
+  const [mealRes, sessionRes] = await Promise.all([
+    fetch(`http://127.0.0.1:5000/api/cook_meals/${cookId}`),
+    fetch("http://127.0.0.1:5000/api/session")
+  ]);
+
+  const mealData = await mealRes.json();
+  const sessionData = await sessionRes.json();
+
+  if (!mealData || !mealData.meals) {
+    gallery.innerHTML = "<p>No meals found.</p>";
+    return;
+  }
+
+  mealData.meals.forEach(meal => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    // Check if logged-in user is the cook owner
+    const isOwner = sessionData.logged_in && sessionData.user_type === "cook" && sessionData.user_id == cookId;
+
+    card.innerHTML = `
+      <img src="data:image/jpeg;base64,${meal.image}" 
+           class="loading"
+           data-name="${meal.name}"
+           data-price="${meal.price}" 
+           data-description="${meal.description}"
+           alt="${meal.name}">
+      ${isOwner ? `
+        <button class="delete-meal-btn" data-meal-id="${meal.id}" style="margin-top: 10px; background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer;">
+          🗑️ Delete
+        </button>
+      ` : ''}
+    `;
+
+    // Fade-in effect
+    const img = card.querySelector('img');
+    img.onload = () => {
+      img.classList.remove('loading');
+      img.style.animation = 'fadeIn 0.6s ease-out';
+    };
+
+    gallery.appendChild(card);
+  });
+
+  // Delete button handler
+  document.querySelectorAll('.delete-meal-btn').forEach(button => {
+    button.addEventListener('click', async (e) => {
+      const mealId = e.target.dataset.mealId;
+
+      if (!confirm("Are you sure you want to delete this meal?")) return;
+
+      try {
+        const res = await fetch(`http://127.0.0.1:5000/delete_meal/${mealId}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+          alert("Meal deleted.");
+          location.reload();
+        } else {
+          throw new Error(result.error || "Failed to delete meal.");
+        }
+      } catch (err) {
+        console.error("Delete error:", err);
+        alert("Error deleting meal. Please try again.");
+      }
+    });
+  });
+});
+
 

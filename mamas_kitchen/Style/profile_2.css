@@ -13,7 +13,9 @@
   --footer-bg: #2D3436;
   --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
-
+*{
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
 [data-theme="dark"] {
   /* Dark Mode Overrides */
   --text: #f8f9fa;
